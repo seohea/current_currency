@@ -7,8 +7,15 @@
         <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
         <meta name="viewport" content="user-scalable=no, initial-scale=0.5, maximum-scale=0.5, width=device-width" />
         <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href='https://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
 
         <style type="text/css">
+            body{
+                min-height: 100%;
+                -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+                font-family: 'Lato', sans-serif;
+            }
+
             .navbar-header {
                 float: left;
                 padding: 15px;
@@ -24,7 +31,7 @@
                 -webkit-appearance: none;
                 border: 0px;
                 border: none;
-                font-size: 24px;
+                font-size: 28px;
                 background-color: rgba(0,0,0,0);
                 width: 100%;
             }
@@ -38,28 +45,38 @@
                 margin-right: 20px;
             }
 
-            .country_code{
-                font-size: 30px;
-            }
-
-            .caption_ccode{
-                font-size: 12px;
-                color: grey;
-                text-align: center;
-            }
-
             .dollar_sign{
-                font-size: 24px;
+                font-size: 28px;
                 padding-right: 5px;
             }
 
+            .country_code{
+                font-size: 24px;
+            }
+
+            .country_code_detail{
+                font-size: 11px;
+                letter-spacing: 0px;
+                display: block;
+                color:grey;
+            }
+
             #target_panel{
-                /*
-                background: url(img/hong_kong.gif) no-repeat right; 
-                background-size: 50%;
-                */
                 color: black;
-                border-color: #0099ff;
+                /*border-color: #0099ff;*/
+            }
+
+            .myPanel{
+                /*box-shadow: 0 1px 1px rgba(0,0,0,0.19), 0 1px 1px rgba(0,0,0,0.23);*/
+                margin: 5px 0px;
+            }
+
+            .panel{
+                border-radius: 0px;
+            }
+
+            .panel-body{
+                padding: 8px 2px;
             }
 
             .flag{
@@ -71,14 +88,12 @@
                 height: 40px; 
             }
 
-            #target_panel .flag{
-                background: url(img/hong_kong.gif) no-repeat center; 
-                background-size: 200%;
+            #tiles{
+                margin-bottom: 60px;
+                width: 100%;
+                overflow: scroll;
             }
 
-            .panel-body{
-                padding: 10px;
-            }
 
             .flag:hover, .flag:focus, .flag:active { outline: none !important;} .flag { outline: none; }
             .input:hover, .input:focus, .input:active { outline: none !important;} .input { outline: none; }
@@ -93,6 +108,41 @@
         <script type="text/javascript">
             var allrates;
             var mycurrencycountries = [];
+            var mycurrencycountry;
+            var countries = {   "HKD":"Hong Kong Dollar",
+                                "CNY":"Chinese Yuan",
+                                "AUD":"Australian dollar",
+                                "BGN":"Bulgarian lev",
+                                "BRL":"Brazilian real",
+                                "CAD":"Canadian dollar",
+                                "CHF":"Swiss franc",
+                                "CZK":"Czech koruna",
+                                "DKK":"Danish krone",
+                                "EUR":"Euro",
+                                "GBP":"Pound sterling",
+                                "HRK":"Croatian kuna",
+                                "HUF":"Hungarian forint",
+                                "IDR":"Indonesian rupiah",
+                                "ILS":"Israeli new shekel",
+                                "INR":"Indian rupee",
+                                "JPY":"Japanese Yen",
+                                "KRW":"South Korean Won",
+                                "MXN":"Mexican peso",
+                                "MYR":"Malaysian ringgit",
+                                "NOK":"Norwegian krone",
+                                "NZD":"New Zealand dollar",
+                                "PHP":"Philippine peso",
+                                "PLN":"Polish złoty",
+                                "RON":"Romanian leu",
+                                "RUB":"Russian ruble",
+                                "SEK":"Swedish krona",
+                                "SGD":"Singapore dollar",
+                                "THB":"Thai baht",
+                                "TRY":"Turkish lira",
+                                "USD":"US Dollar",
+                                "ZAR":"South African rand"
+                            };
+
 
             $(document).ready(function() {
                 get_history();
@@ -103,9 +153,12 @@
             function get_history(){
                 var retrievedObject = localStorage.getItem('mycurrencycountries');
                 mycurrencycountries = JSON.parse(retrievedObject);
-
                 if (mycurrencycountries == null)
                     mycurrencycountries = [];
+
+                mycurrencycountry = localStorage.getItem('mycurrencycountry');
+                if (mycurrencycountry == null)
+                    mycurrencycountry = "HKD";
             }
 
             function clear_history(){
@@ -117,6 +170,9 @@
             function add_history(){
                 window.localStorage.removeItem("mycurrencycountries");
                 window.localStorage.setItem("mycurrencycountries", JSON.stringify(mycurrencycountries));
+
+                window.localStorage.removeItem("mycurrencycountry");
+                window.localStorage.setItem("mycurrencycountry", mycurrencycountry);
             }
 
             function gen_tiles(){
@@ -128,6 +184,11 @@
                 }
 
                 fill_tiles_id();
+
+                $("#target_panel .country_code").text(mycurrencycountry);
+                $("#target_panel .country_code_detail").text(countries[mycurrencycountry]);
+                $("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.gif) no-repeat center');
+                $("#target_panel .flag").css('background-size', '180%');
             }
 
             function fill_tiles_id(){
@@ -146,14 +207,17 @@
             }
 
             function convert(country, value){
-                //console.log(country+" : "+value);
                 var rate = allrates.rates[country];
-                var result = (parseFloat(value)*parseFloat(rate)).toFixed(5).toString();
+                var result = (parseFloat(value)*parseFloat(rate)).toFixed(4).toString();
+                if(isNaN(result)){
+                    result = $("#target_panel .input_newstyle").val();
+                }
                 //$("#to"+country).val(result);
                 $("#tile_"+country+" .input_newstyle").val(result);
                 $("#tile_"+country+" .country_code").text(country);
-                $("#tile_"+country+" .flag").css('background', 'url(img/logo.png) no-repeat center');
-                $("#tile_"+country+" .flag").css('background-size', '200%');
+                $("#tile_"+country+" .country_code_detail").text((countries[country])?countries[country]:"");
+                $("#tile_"+country+" .flag").css('background', 'url(img/'+country+'.png) no-repeat center');
+                $("#tile_"+country+" .flag").css('background-size', '180%');
 
                 //$('.input_newstyle').blur()
             }
@@ -165,11 +229,38 @@
                 tobeConvert($("#ifrom").val());
             }
 
+            function setcountry(value){
+                if(value == null || value == "")
+                    value = "HKD";
+                mycurrencycountry = value;
+
+                add_history();
+                gen_tiles(); 
+                getAllData();
+            }
+
+            function change_icon(value){
+                $("#"+value+" .flag").attr({'style':'background-image:none',
+                                            'class':'btn btn-default flag',
+                                            'onclick':"remove_country($(this).closest('.panel').attr('id'));"
+                                        });
+                $("#"+value+" .flag").html("<span class='icon icon-trash'></span>");
+            }
+
+            function remove_country(value){
+                var value = value.split("_")[1];
+
+                mycurrencycountries.splice( $.inArray(value, mycurrencycountries), 1 );
+                add_history();
+                gen_tiles();
+                tobeConvert($("#ifrom").val());
+            }
+
             function getAllData(){
 
                 $.ajax({
                     type : "Get",
-                    url : 'http://api.fixer.io/latest?base=HKD',
+                    url : 'http://api.fixer.io/latest?base='+mycurrencycountry,
                     success : function(data){
                         console.log(data);
                         allrates = data;
@@ -236,6 +327,8 @@
         <nav class="navbar navbar-default navbar-fixed-top" id="nav">
             <div class="navbar-header">
                 <a class="navbar-brand">Current Currency</a>
+                <br>
+                <span style="font-size:12px;">Last updated: GMT 15:00</span>
             </div>
         </nav>
 
@@ -260,8 +353,11 @@
                         <div class="right">
                             <table>
                                 <tr>
-                                    <td><span class="country_code">HKD</span></td>
-                                    <td><button class="btn btn-default flag"></button></td>
+                                    <td width="90"><span class="country_code"></span></td>
+                                    <td rowspan="2"><button class="btn btn-default flag"></button></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="country_code_detail"></span></td>
                                 </tr>
                             </table>
                         </div> 
@@ -298,7 +394,8 @@
           </div>
         </div>
 
-        <div class="modal" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <!-- Add -->
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -315,14 +412,37 @@
           </div>
         </div>
 
-        <nav class="navbar navbar-default navbar-fixed-bottom" >
+        <!-- Set -->
+        <div class="modal fade" id="setModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"><span class="icon icon-close"></span></span></button>
+                <h4 class="modal-title" id="myModalLabel">Set Country</h4>
+              </div>
+              <div class="modal-body">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="set_country">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick="setcountry($('#set_country').val());"><span class="icon icon-check"></span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="navbar navbar-default navbar-fixed-bottom" id="bottomnav">
             <div class="container">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#addModal"><span class="icon icon-plus"></span></button>
                     </div>
                     <div class="btn-group" role="group">
-                        <button class="btn btn-default" type="button" onclick="clear_history();"><span class="icon icon-trash"></button>
+                        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#setModal"><span class="icon icon-gear"></span></button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary" type="button" onclick="clear_history();"><span class="icon icon-trash"></button>
                     </div>
                 </div>
             </div>
@@ -343,8 +463,11 @@
                         <div class="right">
                             <table>
                                 <tr>
-                                    <td><span class="country_code"></span></td>
-                                    <td><button class="btn btn-default flag"></button></td>
+                                    <td width="90"><span class="country_code"></span></td>
+                                    <td rowspan="2"><button class="btn btn-default flag" onclick="change_icon($(this).closest('.panel').attr('id'));"></button></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="country_code_detail"></span></td>
                                 </tr>
                             </table>
                         </div>
