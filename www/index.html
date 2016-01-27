@@ -8,6 +8,7 @@
         <meta name="viewport" content="user-scalable=no, initial-scale=0.5, maximum-scale=0.5, width=device-width" />
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href='https://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+        <script type="text/javascript" src="https://www.google.com/jsapi" ></script>
 
         <style type="text/css">
             body{
@@ -61,6 +62,10 @@
                 color:grey;
             }
 
+            #chartModaltitle{
+                font-size: 13px;
+            }
+
             #target_panel{
                 color: black;
                 /*border-color: #0099ff;*/
@@ -107,19 +112,22 @@
 
         <script type="text/javascript">
             var allrates;
+            var counter;
+            var allrates_history = [];
             var mycurrencycountries = [];
             var mycurrencycountry;
-            var countries = {   "HKD":"Hong Kong Dollar",
-                                "CNY":"Chinese Yuan",
+            var countries = {   
                                 "AUD":"Australian dollar",
                                 "BGN":"Bulgarian lev",
                                 "BRL":"Brazilian real",
                                 "CAD":"Canadian dollar",
                                 "CHF":"Swiss franc",
+                                "CNY":"Chinese Yuan",
                                 "CZK":"Czech koruna",
                                 "DKK":"Danish krone",
                                 "EUR":"Euro",
                                 "GBP":"Pound sterling",
+                                "HKD":"Hong Kong Dollar",
                                 "HRK":"Croatian kuna",
                                 "HUF":"Hungarian forint",
                                 "IDR":"Indonesian rupiah",
@@ -148,6 +156,7 @@
                 get_history();
                 gen_tiles();
                 getAllData();
+
             });
 
             function get_history(){
@@ -216,8 +225,10 @@
                 $("#tile_"+country+" .input_newstyle").val(result);
                 $("#tile_"+country+" .country_code").text(country);
                 $("#tile_"+country+" .country_code_detail").text((countries[country])?countries[country]:"");
+                /*
                 $("#tile_"+country+" .flag").css('background', 'url(img/'+country+'.png) no-repeat center');
                 $("#tile_"+country+" .flag").css('background-size', '180%');
+                */
 
                 //$('.input_newstyle').blur()
             }
@@ -239,14 +250,6 @@
                 getAllData();
             }
 
-            function change_icon(value){
-                $("#"+value+" .flag").attr({'style':'background-image:none',
-                                            'class':'btn btn-default flag',
-                                            'onclick':"remove_country($(this).closest('.panel').attr('id'));"
-                                        });
-                $("#"+value+" .flag").html("<span class='icon icon-trash'></span>");
-            }
-
             function remove_country(value){
                 var value = value.split("_")[1];
 
@@ -254,6 +257,16 @@
                 add_history();
                 gen_tiles();
                 tobeConvert($("#ifrom").val());
+            }
+
+            function country_select(){
+                var options = '<option value="-" disabled selected> -- Please select -- </option>';
+                for (var i = 0; i < Object.keys(countries).length; i++) {
+                    options += '<option value="' + Object.keys(countries)[i]+ '">' + Object.keys(countries)[i]+" - "+ countries[Object.keys(countries)[i]] + '</option>';
+                }
+                $("#country_select").html(options);
+
+                $("#set_country").html(options);
             }
 
             function getAllData(){
@@ -266,14 +279,14 @@
                         allrates = data;
 
                         tobeConvert($("#ifrom").val());
-
-                        
+                        country_select();
+                        /*
                         var options = '<option value="-default-" disabled selected> -- Please select -- </option>';
                         for (var i = 0; i <  Object.keys(allrates.rates).length; i++) {
                             options += '<option value="' + Object.keys(allrates.rates)[i]+ '">' + Object.keys(allrates.rates)[i] + '</option>';
                         }
                         $("#country_select").html(options);
-                        
+                        */
                     },
                     error : function(httpReq,status,exception){
                         alert(status+" "+exception);
@@ -281,23 +294,87 @@
                 });
             }
 
-            /*
-            function select_panel(id){
-                target_name = $("#"+id+" .pname").text();
-                $('#removeModal_title span').text(target_name);
 
-                if(target_name.indexOf("無法取得Likes!，請重新整理") == -1){
-                    $("#removeModal").modal('show');
+            function buffer_getSpecificData(){
+                counter = 6;
+                allrates_history = [];
+                 getSpecificData();
+            }
+
+            function getSpecificData(){
+                var now = new Date();
+                var interval = $("#chartinterval").val();
+                now.setDate(now.getDate()-counter*interval);
+                var date = now.toISOString().slice(0,10);
+                
+                $.ajax({
+                    type : "Get",
+                    async: true,
+                    url : 'http://api.fixer.io/'+date+'?base='+mycurrencycountry,
+                    success : function(data){
+                        allrates_history.push(data);
+                        
+                        if(counter > 0){
+                            counter--;
+                            getSpecificData();
+                        }else{
+                            alert("done");
+                        }
+                    },
+                    error : function(httpReq,status,exception){
+                        alert(status+" "+exception);
+                    }
+                });
+                
+            }
+
+
+            function openChart(value){
+                $("#resultfig").html("");
+                value = value.split("_")[1];
+
+                $("#chartModaltitle").html("<span>"+countries[mycurrencycountry]+" ("+mycurrencycountry+")&nbsp;</span><span class='icon icon-right-nav' style='font-size:12px;'></span><span>&nbsp;"+countries[value]+" ("+value+")</span>");
+
+                drawCurveTypes(value);
+                $("#chartModal").modal('toggle');
+            }
+
+            google.load('visualization', '1', {packages: ['corechart', 'line']});
+
+            function drawCurveTypes(value) {
+
+                var newchart = new google.visualization.DataTable();
+                newchart.addColumn('string', 'time');
+                newchart.addColumn('number', 'rate');
+
+                //newchart.addRows(mydata);
+                //newchart.addRows([ ["test1",0.1],["test2",0.2],["test3",0.3]  ]);
+
+                for(i = 0; i < allrates_history.length; i++){
+                    newchart.addRow([allrates_history[i].date, parseFloat(allrates_history[i].rates[value])]);
                 }
+
+                var options = {
+                  hAxis: {
+                    showTextEvery: 0, 
+                    slantedText: true, 
+                    slantedTextAngle: 60
+                  },
+                  fontSize: 12,
+                  pointsVisible: true,
+                  pointSize: 3,
+                  pointShape: 'circle',
+                  'height':300,
+                  'width':$(window).width()*0.82,
+                  chartArea:{left:60,top:20,width:'90%',height:'70%'},
+                  selectionMode: 'none',
+                  tooltip: {trigger: 'none'}
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('resultchart'));
+                chart.draw(newchart, options);
             }
 
-            function remove_item(){
-                fblist = $.grep(fblist,function(o,i) { return o.name === target_name; },true);
-
-                retrieve_info();
-                target_name = "";
-            }
-            */
 
             //------ADS
             
@@ -327,8 +404,6 @@
         <nav class="navbar navbar-default navbar-fixed-top" id="nav">
             <div class="navbar-header">
                 <a class="navbar-brand">Current Currency</a>
-                <br>
-                <span style="font-size:12px;">Last updated: GMT 15:00</span>
             </div>
         </nav>
 
@@ -386,6 +461,7 @@
                   <li>All right reserved &copy; Seohea Production</li>
                   <li>Version 0.1</li>
                 </ul>
+                <span style="font-size:12px;">Currecny rate last updated at GMT+3 15:00</span>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span>&nbsp;關閉</button>
@@ -421,12 +497,31 @@
                 <h4 class="modal-title" id="myModalLabel">Set Country</h4>
               </div>
               <div class="modal-body">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="set_country">
-                </div>
+                <select id="set_country"></select>
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick="setcountry($('#set_country').val());"><span class="icon icon-check"></span></button>
+                <hr>
+                <input type="number" id="chartinterval" value="7"><span>days</span>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick="setcountry($('#set_country').val());"><span class="icon icon-check"></span></button>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- chart -->
+        <div class="modal fade" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"><span class="icon icon-close"></span></span></button>
+                <h4 class="modal-title" id="chartModaltitle"></h4>
+              </div>
+              <div class="modal-body">
+                <div id="resultchart" style="height:340px; width:100%; padding:0px; margin:0px; display:block;"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick=""><span class="icon icon-check"></span></button>
               </div>
             </div>
           </div>
@@ -444,12 +539,15 @@
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary" type="button" onclick="clear_history();"><span class="icon icon-trash"></button>
                     </div>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary" type="button" onclick="buffer_getSpecificData();"><span class="icon icon-star"></button>
+                    </div>
                 </div>
             </div>
         </nav>
 
         <script id="hidden-template" type="text/x-custom-template">
-            <div class="panel panel-default myPanel" style="display:none;">
+            <div class="panel panel-default myPanel" style="display:none;" onclick="openChart($(this).closest('.panel').attr('id'));">
                 <div class="panel-body">
                     <div class="row"> 
                         <div class="left">
@@ -464,7 +562,7 @@
                             <table>
                                 <tr>
                                     <td width="90"><span class="country_code"></span></td>
-                                    <td rowspan="2"><button class="btn btn-default flag" onclick="change_icon($(this).closest('.panel').attr('id'));"></button></td>
+                                    <td rowspan="2"><button class="btn btn-default flag"></button></td>
                                 </tr>
                                 <tr>
                                     <td><span class="country_code_detail"></span></td>
