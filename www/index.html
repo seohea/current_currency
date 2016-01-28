@@ -116,6 +116,7 @@
             var allrates_history = [];
             var mycurrencycountries = [];
             var mycurrencycountry;
+            var last_retrieved_1;
             var countries = {   
                                 "AUD":"Australian dollar",
                                 "BGN":"Bulgarian lev",
@@ -153,11 +154,43 @@
 
 
             $(document).ready(function() {
+                alert(calTime());
+                //alert(getCETDay());
                 get_history();
                 gen_tiles();
                 getAllData();
+                
 
             });
+
+            function getCEThour() {
+                var offset = 1;
+                try{
+                    return parseInt(new Date( new Date().getTime() + offset * 3600 * 1000).toUTCString().replace( / GMT$/, "" ).split(" ")[4].split(":")[0]);
+                }catch(err){}
+            }
+
+            function getCETDay() {
+                var offset = 1;
+                try{
+                    return parseInt(new Date( new Date().getTime() + offset * 3600 * 1000).toUTCString().replace( / GMT$/, "" ).split(" ")[1]);
+                }catch(err){}
+            }
+
+            function calTime() {
+                var offset = 1;
+                try{
+                    var date = new Date();
+                    date.setUTCHours(15);
+                    var date1 = date.getTime() + 3600 * 1000;
+                    var date2 = new Date().getTime() + 3600 * 1000;
+                    var hours = Math.abs(date1 - date2) / 36e5 - 1;
+
+                    return hours;
+                }catch(err){}
+            }
+
+
 
             function get_history(){
                 var retrievedObject = localStorage.getItem('mycurrencycountries');
@@ -168,6 +201,8 @@
                 mycurrencycountry = localStorage.getItem('mycurrencycountry');
                 if (mycurrencycountry == null)
                     mycurrencycountry = "HKD";
+
+                last_retrieved_1= localStorage.getItem('last_retrieved_1');
             }
 
             function clear_history(){
@@ -368,7 +403,8 @@
                   'width':$(window).width()*0.82,
                   chartArea:{left:60,top:20,width:'90%',height:'70%'},
                   selectionMode: 'none',
-                  tooltip: {trigger: 'none'}
+                  tooltip: {trigger: 'none'},
+                  curveType: 'function'
                 };
 
                 var chart = new google.visualization.LineChart(document.getElementById('resultchart'));
