@@ -201,6 +201,40 @@
                                 "USD":"US Dollar",
                                 "ZAR":"South African rand"
                             };
+            var countries_sign = {   
+                                "AUD":"$",
+                                "BGN":"лв",
+                                "BRL":"$",
+                                "CAD":"$",
+                                "CHF":"Fr",
+                                "CNY":"$",
+                                "CZK":"Kč",
+                                "DKK":"Kr",
+                                "EUR":"€",
+                                "GBP":"$", 
+                                "HKD":"$",
+                                "HRK":"Kn",
+                                "HUF":"Ft",
+                                "IDR":"Rp",
+                                "ILS":"₪",
+                                "INR":"₹",
+                                "JPY":"¥",
+                                "KRW":"₩",
+                                "MXN":"$",
+                                "MYR":"RM",
+                                "NOK":"kr",
+                                "NZD":"$",
+                                "PHP":"₱",
+                                "PLN":"zł",
+                                "RON":"$",
+                                "RUB":"₽",
+                                "SEK":"kr",
+                                "SGD":"$",
+                                "THB":"฿",
+                                "TRY":"₺",
+                                "USD":"$",
+                                "ZAR":"R"
+                            };
 
 
             $(document).ready(function() {
@@ -319,6 +353,8 @@
                 $("#target_panel .country_code_detail").text(countries[mycurrencycountry]);
                 $("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.png) no-repeat center');
                 $("#target_panel .flag").css('background-size', '180%');
+
+                $("#target_panel .dollar_sign").text(countries_sign[mycurrencycountry]);
             }
 
             function fill_tiles_id(){
@@ -349,6 +385,8 @@
                 
                 $("#tile_"+country+" .flag").css('background', 'url(img/'+country+'.png) no-repeat center');
                 $("#tile_"+country+" .flag").css('background-size', '180%');
+
+                $("#tile_"+country+" .dollar_sign").text((countries_sign[country])?countries_sign[country]:"");
                 
 
                 //$('.input_newstyle').blur()
