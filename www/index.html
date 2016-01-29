@@ -26,6 +26,7 @@
             }
             .navbar-brand {
                 float:none;
+                font-size: 14px;
             }
 
             .input_newstyle{
@@ -40,16 +41,17 @@
             .left{
                 float:left;
                 margin-left: 20px;
-                max-width: 50%;
+                max-width: 45%;
             }
             .right{
                 float:right;
-                margin-right: 20px;
+                padding-right: 20px;
+                max-width: 45%;
             }
 
             .dollar_sign{
                 font-size: 28px;
-                padding-right: 5px;
+                margin-right: 5px;
             }
 
             .country_code{
@@ -97,7 +99,7 @@
             #tiles{
                 margin-bottom: 60px;
                 width: 100%;
-                overflow: scroll;
+                overflow: hidden;
             }
 
             #loading{
@@ -119,15 +121,15 @@
             }
 
 
-            .splashanimation {-webkit-animation: anim1 ease-in-out 0.5s infinite alternate; }
-            @-webkit-keyframes anim1
+            .splashanimation {-webkit-animation: anim2 ease-in-out 0.5s infinite alternate; }
+            @-webkit-keyframes anim2
             {
                from {border-color: transparent; }
                to   {border-color: #a6a6a6; }
             }
 
             .modal-header{
-                background-color: #263238;
+                background-color: black;
                 color:white;
                 border-bottom: 0px;
                 box-shadow: 0 1px 1px rgba(0,0,0,0.19), 0 1px 1px rgba(0,0,0,0.23);
@@ -202,13 +204,17 @@
 
 
             $(document).ready(function() {
+                //init_func();
+            });
+
+            function init_func(){
                 get_history();
                 gen_tiles();
                 calTime();
                 buffer_getSpecificData();
                 tutorial();
-                
-            });
+                toLocalTime();
+            }
 
             function tutorial(){
                 $('body').animate({ scrollTop: 0 });
@@ -218,18 +224,14 @@
                 }, 5000);
             }
 
-            function getCEThour() {
-                var offset = 1;
+            function toLocalTime(){
+                var date = new Date(new Date(new Date(last_draw_date - 3600 * 1000)).toUTCString().replace( / GMT$/, " UTC" ));
                 try{
-                    return parseInt(new Date( new Date().getTime() + offset * 3600 * 1000).toUTCString().replace( / GMT$/, "" ).split(" ")[4].split(":")[0]);
-                }catch(err){}
-            }
-
-            function getCETDay() {
-                var offset = 1;
-                try{
-                    return parseInt(new Date( new Date().getTime() + offset * 3600 * 1000).toUTCString().replace( / GMT$/, "" ).split(" ")[1]);
-                }catch(err){}
+                    $(".navbar-brand").text("Last updated: "+date.toString().split("GMT")[0]);
+                }catch(excpetion){
+                    $(".navbar-brand").text("Current Currency");
+                }
+                
             }
 
             function calTime() {
@@ -241,10 +243,12 @@
                         console.log("New comer.");
                         last_draw_date = nowDate;
                         getAllData();
+                        toLocalTime();
                     }else if (Math.abs(last_draw_date - nowDate) / 36e5 >= 24 ){
                         console.log("Didn't draw > 24 hours: "+Math.abs(last_draw_date - nowDate));
                         last_draw_date = nowDate;
                         getAllData();
+                        toLocalTime();
                     }else{
                         console.log("drawed within 24 hours!");
                         tobeConvert($("#ifrom").val());
@@ -313,8 +317,8 @@
 
                 $("#target_panel .country_code").text(mycurrencycountry);
                 $("#target_panel .country_code_detail").text(countries[mycurrencycountry]);
-                //$("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.gif) no-repeat center');
-                //$("#target_panel .flag").css('background-size', '180%');
+                $("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.gif) no-repeat center');
+                $("#target_panel .flag").css('background-size', '180%');
             }
 
             function fill_tiles_id(){
@@ -416,7 +420,7 @@
 
 
             function buffer_getSpecificData(){
-                $("#loading").show();
+                $("#loading").slideDown( 400, "linear" );
                 counter = 6;
                 allrates_history = [];
                 var interval = $("#chartinterval").val();
@@ -435,7 +439,7 @@
                         counter--;
                         getSpecificData(interval);
                     }else{
-                        $("#loading").slideUp( 500, "linear" );
+                        $("#loading").slideUp( 800, "linear" );
                         $('body').animate({ scrollTop: 0 });
                     }
                     return false;
@@ -469,7 +473,7 @@
                                 counter--;
                                 getSpecificData(interval);
                             }else{
-                                $("#loading").slideUp( 1000, "linear" );
+                                $("#loading").slideUp( 800, "linear" );
                                 $('body').animate({ scrollTop: 0 });
                             }
                         },
@@ -542,6 +546,7 @@
                 document.addEventListener("resume", onResume, false);
                 document.addEventListener("backbutton", onBackKeyDown, false);
 
+                init_func();
                 //initAds();
                 //admob.createBannerView();
             }
@@ -559,6 +564,7 @@
             }
 
             function onResume() {
+
             }
 
             document.addEventListener("deviceready", onDeviceReady, false);
@@ -633,7 +639,7 @@
         </div>
 
         <!-- aboutModal -->
-        <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -656,7 +662,7 @@
         </div>
 
         <!-- Add -->
-        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -674,7 +680,7 @@
         </div>
 
         <!-- Set -->
-        <div class="modal fade" id="setModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal" id="setModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -698,7 +704,7 @@
         </div>
 
         <!-- chart -->
-        <div class="modal fade" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
