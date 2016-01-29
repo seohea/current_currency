@@ -32,6 +32,7 @@
                 -webkit-appearance: none;
                 border: 0px;
                 border: none;
+                border-radius: 5px;
                 font-size: 28px;
                 background-color: rgba(0,0,0,0);
                 width: 100%;
@@ -99,6 +100,53 @@
                 overflow: scroll;
             }
 
+            #loading{
+                text-align: center;
+                display: none;
+                color:#4d4d4d;
+                padding-bottom: 50px;
+            }
+
+            .moveanimation {-webkit-animation: anim1 ease-in-out 1s infinite alternate; }
+            @-webkit-keyframes anim1
+            {
+               from {-webkit-transform: rotate(0deg); }
+               to   {-webkit-transform: rotate(720deg); }
+            }
+
+            .borderBlink{    
+                border:1px solid;
+            }
+
+
+            .splashanimation {-webkit-animation: anim1 ease-in-out 0.5s infinite alternate; }
+            @-webkit-keyframes anim1
+            {
+               from {border-color: transparent; }
+               to   {border-color: #a6a6a6; }
+            }
+
+            .modal-header{
+                background-color: #263238;
+                color:white;
+                border-bottom: 0px;
+                box-shadow: 0 1px 1px rgba(0,0,0,0.19), 0 1px 1px rgba(0,0,0,0.23);
+            }
+
+            .divider {
+                width:100%;
+                text-align:center;
+            }
+
+            .divider hr {
+                margin-left:auto;
+                margin-right:auto;
+                width:40%;
+            }
+
+            .hrleft { float:left; }
+            .hrright { float:right; }
+            .hrdown{ font-size: 16px; padding-top: 10px; }
 
             .flag:hover, .flag:focus, .flag:active { outline: none !important;} .flag { outline: none; }
             .input:hover, .input:focus, .input:active { outline: none !important;} .input { outline: none; }
@@ -116,7 +164,7 @@
             var allrates_history = [];
             var mycurrencycountries = [];
             var mycurrencycountry;
-            var last_retrieved_1;
+            var last_draw_date;
             var countries = {   
                                 "AUD":"Australian dollar",
                                 "BGN":"Bulgarian lev",
@@ -154,14 +202,21 @@
 
 
             $(document).ready(function() {
-                alert(calTime());
-                //alert(getCETDay());
                 get_history();
                 gen_tiles();
-                getAllData();
+                calTime();
+                buffer_getSpecificData();
+                tutorial();
                 
-
             });
+
+            function tutorial(){
+                $('body').animate({ scrollTop: 0 });
+                $("#ifrom").attr('class','input_newstyle borderBlink splashanimation');
+                setTimeout(function(){ 
+                    $("#ifrom").attr('class','input_newstyle');
+                }, 5000);
+            }
 
             function getCEThour() {
                 var offset = 1;
@@ -180,14 +235,24 @@
             function calTime() {
                 var offset = 1;
                 try{
-                    var date = new Date();
-                    date.setUTCHours(15);
-                    var date1 = date.getTime() + 3600 * 1000;
-                    var date2 = new Date().getTime() + 3600 * 1000;
-                    var hours = Math.abs(date1 - date2) / 36e5 - 1;
+                    var nowDate = new Date().getTime() + 3600 * 1000;
 
-                    return hours;
+                    if (last_draw_date == null){
+                        console.log("New comer.");
+                        last_draw_date = nowDate;
+                        getAllData();
+                    }else if (Math.abs(last_draw_date - nowDate) / 36e5 >= 24 ){
+                        console.log("Didn't draw > 24 hours: "+Math.abs(last_draw_date - nowDate));
+                        last_draw_date = nowDate;
+                        getAllData();
+                    }else{
+                        console.log("drawed within 24 hours!");
+                        tobeConvert($("#ifrom").val());
+                        country_select();
+                    }
+
                 }catch(err){}
+
             }
 
 
@@ -202,13 +267,24 @@
                 if (mycurrencycountry == null)
                     mycurrencycountry = "HKD";
 
-                last_retrieved_1= localStorage.getItem('last_retrieved_1');
+                last_draw_date = localStorage.getItem('rate_last_draw_date');
+
+                var retrievedObject2 = localStorage.getItem('rate_history_'+mycurrencycountry);
+                allrates = JSON.parse(retrievedObject2);
+
             }
 
             function clear_history(){
-                window.localStorage.removeItem("mycurrencycountries");
+                window.localStorage.clear();
+                allrates = null;
+                allrates_history = [];
                 mycurrencycountries = [];
+                last_draw_date = 0;
+
+                get_history();
                 gen_tiles();
+                calTime();
+                buffer_getSpecificData();
             }
 
             function add_history(){
@@ -217,6 +293,12 @@
 
                 window.localStorage.removeItem("mycurrencycountry");
                 window.localStorage.setItem("mycurrencycountry", mycurrencycountry);
+
+                window.localStorage.removeItem("rate_last_draw_date");
+                window.localStorage.setItem("rate_last_draw_date", last_draw_date);
+
+                window.localStorage.removeItem("rate_history_"+mycurrencycountry);
+                window.localStorage.setItem("rate_history_"+mycurrencycountry, JSON.stringify(allrates));
             }
 
             function gen_tiles(){
@@ -231,8 +313,8 @@
 
                 $("#target_panel .country_code").text(mycurrencycountry);
                 $("#target_panel .country_code_detail").text(countries[mycurrencycountry]);
-                $("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.gif) no-repeat center');
-                $("#target_panel .flag").css('background-size', '180%');
+                //$("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.gif) no-repeat center');
+                //$("#target_panel .flag").css('background-size', '180%');
             }
 
             function fill_tiles_id(){
@@ -283,6 +365,7 @@
                 add_history();
                 gen_tiles(); 
                 getAllData();
+                buffer_getSpecificData();
             }
 
             function remove_country(value){
@@ -313,6 +396,8 @@
                         console.log(data);
                         allrates = data;
 
+                        add_history();
+
                         tobeConvert($("#ifrom").val());
                         country_select();
                         /*
@@ -331,35 +416,68 @@
 
 
             function buffer_getSpecificData(){
+                $("#loading").show();
                 counter = 6;
                 allrates_history = [];
-                 getSpecificData();
+                var interval = $("#chartinterval").val();
+                getSpecificData(interval);
             }
 
-            function getSpecificData(){
+            function get_rates_history(date, base, interval){
+                var retrievedObject = localStorage.getItem("ratehist_"+base+"_"+date);
+                var data = JSON.parse(retrievedObject);
+                if (retrievedObject == null){
+                    console.log("Going to get: "+base+" "+date);
+                    return true;
+                }else{
+                    allrates_history.push(data);
+                    if(counter > 0){
+                        counter--;
+                        getSpecificData(interval);
+                    }else{
+                        $("#loading").slideUp( 500, "linear" );
+                        $('body').animate({ scrollTop: 0 });
+                    }
+                    return false;
+                }
+
+            }
+
+            function add_rates_history(obj){
+                window.localStorage.setItem("ratehist_"+obj.base+"_"+obj.date, JSON.stringify(obj));
+                console.log("Fetched and added new rates to sys. "+obj.base+" "+obj.date);
+            }
+
+            function getSpecificData(interval){
                 var now = new Date();
-                var interval = $("#chartinterval").val();
                 now.setDate(now.getDate()-counter*interval);
                 var date = now.toISOString().slice(0,10);
-                
-                $.ajax({
-                    type : "Get",
-                    async: true,
-                    url : 'http://api.fixer.io/'+date+'?base='+mycurrencycountry,
-                    success : function(data){
-                        allrates_history.push(data);
-                        
-                        if(counter > 0){
-                            counter--;
-                            getSpecificData();
-                        }else{
-                            alert("done");
+
+                if(get_rates_history(date, mycurrencycountry, interval)){
+                    
+                    $.ajax({
+                        type : "Get",
+                        async: true,
+                        url : 'http://api.fixer.io/'+date+'?base='+mycurrencycountry,
+                        success : function(data){
+                            data.date = date;
+
+                            allrates_history.push(data);
+                            add_rates_history(data)
+                            
+                            if(counter > 0){
+                                counter--;
+                                getSpecificData(interval);
+                            }else{
+                                $("#loading").slideUp( 1000, "linear" );
+                                $('body').animate({ scrollTop: 0 });
+                            }
+                        },
+                        error : function(httpReq,status,exception){
+                            alert(status+" "+exception);
                         }
-                    },
-                    error : function(httpReq,status,exception){
-                        alert(status+" "+exception);
-                    }
-                });
+                    });
+                }
                 
             }
 
@@ -403,7 +521,6 @@
                   'width':$(window).width()*0.82,
                   chartArea:{left:60,top:20,width:'90%',height:'70%'},
                   selectionMode: 'none',
-                  tooltip: {trigger: 'none'},
                   curveType: 'function'
                 };
 
@@ -415,11 +532,35 @@
             //------ADS
             
             function onDeviceReady() {
-              admob.createBannerView({
-                  publisherId:"ca-app-pub-9969581706012169/7609471531"
-              });
+
+                /*
+                admob.createBannerView({
+                  publisherId:"ca-app-pub-9969581706012169/5605224331"
+                });
+*/
+                
+                document.addEventListener("resume", onResume, false);
+                document.addEventListener("backbutton", onBackKeyDown, false);
+
+                //initAds();
+                //admob.createBannerView();
             }
-            
+
+            function onBackKeyDown() {
+ 
+                if($('.modal').is(':visible')){
+                    $('.modal').modal('hide');
+                    return false;
+                }else{
+                    navigator.app.exitApp();
+                    return false;
+                }
+                
+            }
+
+            function onResume() {
+            }
+
             document.addEventListener("deviceready", onDeviceReady, false);
             
 
@@ -449,8 +590,14 @@
         </header>
 
         <div class="container">
+            <div class="row">
+                <div id="loading"><br><span class="icon icon-refresh moveanimation" style="font-size:22px;"></span><br><p>Monkey is trying to gather Currency Rate <br> in the Sea of Internet...</p></div>
+            </div>
+        </div>
 
-            <div class="panel panel-default" id="target_panel">
+        <div class="container">
+
+            <div class="panel panel-default" id="target_panel" >
                 <div class="panel-body">
                     <div class="row">
                         <div class="left">
@@ -477,7 +624,9 @@
                 </div>
             </div>
 
-            <hr>
+            <div class="divider">
+                <hr class="hrleft"/><span class="icon icon-down-nav hrdown"></span><hr class="hrright" />
+            </div>
 
             <div id="tiles"></div>
 
@@ -533,10 +682,13 @@
                 <h4 class="modal-title" id="myModalLabel">Set Country</h4>
               </div>
               <div class="modal-body">
+                <p>Base Country:</p>
                 <select id="set_country"></select>
-                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick="setcountry($('#set_country').val());"><span class="icon icon-check"></span></button>
+                <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" onclick="setcountry($('#set_country').val());"><span class="icon icon-check"></span></button>
                 <hr>
+                <p>Chart interval:</p>
                 <input type="number" id="chartinterval" value="7"><span>days</span>
+                <button class="btn btn-default btn-xs" data-dismiss="modal" onclick="buffer_getSpecificData();"><span class="icon icon-check"></span></button>
               </div>
               <div class="modal-footer">
                 
@@ -556,9 +708,6 @@
               <div class="modal-body">
                 <div id="resultchart" style="height:340px; width:100%; padding:0px; margin:0px; display:block;"></div>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick=""><span class="icon icon-check"></span></button>
-              </div>
             </div>
           </div>
         </div>
@@ -575,12 +724,16 @@
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary" type="button" onclick="clear_history();"><span class="icon icon-trash"></button>
                     </div>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-primary" type="button" onclick="buffer_getSpecificData();"><span class="icon icon-star"></button>
-                    </div>
                 </div>
             </div>
         </nav>
+
+        <div class="tooltip top">
+            <div class="tooltip-inner">
+                Some tooltip text!
+            </div>
+            <div class="tooltip-arrow"></div>
+        </div>
 
         <script id="hidden-template" type="text/x-custom-template">
             <div class="panel panel-default myPanel" style="display:none;" onclick="openChart($(this).closest('.panel').attr('id'));">
