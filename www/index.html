@@ -185,7 +185,7 @@
                                 "ILS":"Israeli new shekel",
                                 "INR":"Indian rupee",
                                 "JPY":"Japanese Yen",
-                                "KRW":"South Korean Won",
+                                "KRW":"S.Korean Won",
                                 "MXN":"Mexican peso",
                                 "MYR":"Malaysian ringgit",
                                 "NOK":"Norwegian krone",
@@ -204,7 +204,7 @@
 
 
             $(document).ready(function() {
-                //init_func();
+                init_func();
             });
 
             function init_func(){
@@ -221,7 +221,7 @@
                 $("#ifrom").attr('class','input_newstyle borderBlink splashanimation');
                 setTimeout(function(){ 
                     $("#ifrom").attr('class','input_newstyle');
-                }, 5000);
+                }, 8000);
             }
 
             function toLocalTime(){
@@ -317,7 +317,7 @@
 
                 $("#target_panel .country_code").text(mycurrencycountry);
                 $("#target_panel .country_code_detail").text(countries[mycurrencycountry]);
-                $("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.gif) no-repeat center');
+                $("#target_panel .flag").css('background', 'url(img/'+mycurrencycountry+'.png) no-repeat center');
                 $("#target_panel .flag").css('background-size', '180%');
             }
 
@@ -346,10 +346,10 @@
                 $("#tile_"+country+" .input_newstyle").val(result);
                 $("#tile_"+country+" .country_code").text(country);
                 $("#tile_"+country+" .country_code_detail").text((countries[country])?countries[country]:"");
-                /*
+                
                 $("#tile_"+country+" .flag").css('background', 'url(img/'+country+'.png) no-repeat center');
                 $("#tile_"+country+" .flag").css('background-size', '180%');
-                */
+                
 
                 //$('.input_newstyle').blur()
             }
@@ -546,7 +546,7 @@
                 document.addEventListener("resume", onResume, false);
                 document.addEventListener("backbutton", onBackKeyDown, false);
 
-                init_func();
+                //init_func();
                 //initAds();
                 //admob.createBannerView();
             }
