@@ -9,6 +9,7 @@
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href='https://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
         <script type="text/javascript" src="https://www.google.com/jsapi" ></script>
+        <script type="text/javascript" src="js/GALocalStorage.js"></script>
 
         <style type="text/css">
             body{
@@ -249,6 +250,7 @@
 
 
             $(document).ready(function() {
+                initGA();
                 init_func();
             });
 
@@ -334,6 +336,8 @@
                 gen_tiles();
                 calTime();
                 buffer_getSpecificData();
+
+                ga_storage._trackEvent('Main function', 'Clear history', 'ALL');
             }
 
             function add_history(){
@@ -408,6 +412,8 @@
                 add_history();
                 gen_tiles();
                 tobeConvert($("#ifrom").val());
+
+                ga_storage._trackEvent('Main function', 'Add country', value);
             }
 
             function setcountry(value){
@@ -419,6 +425,8 @@
                 gen_tiles(); 
                 getAllData();
                 buffer_getSpecificData();
+
+                ga_storage._trackEvent('Main function', 'Set target country', value);
             }
 
             function remove_country(value){
@@ -428,6 +436,8 @@
                 add_history();
                 gen_tiles();
                 tobeConvert($("#ifrom").val());
+
+                ga_storage._trackEvent('Main function', 'Remove country', value);
             }
 
             function country_select(){
@@ -445,32 +455,29 @@
                 $.ajax({
                     type : "Get",
                     url : 'http://api.fixer.io/latest?base='+mycurrencycountry,
+                    timeout: 8000,
                     success : function(data){
-                        console.log(data);
+                        //console.log(data);
                         allrates = data;
 
                         add_history();
 
                         tobeConvert($("#ifrom").val());
                         country_select();
-                        /*
-                        var options = '<option value="-default-" disabled selected> -- Please select -- </option>';
-                        for (var i = 0; i <  Object.keys(allrates.rates).length; i++) {
-                            options += '<option value="' + Object.keys(allrates.rates)[i]+ '">' + Object.keys(allrates.rates)[i] + '</option>';
-                        }
-                        $("#country_select").html(options);
-                        */
+
+                        ga_storage._trackEvent('Main function', 'Get rates', 'success');
                     },
                     error : function(httpReq,status,exception){
-                        alert(status+" "+exception);
+                        alert("Please ensure your device had connected to internet.");
+                        ga_storage._trackEvent('Main function', 'Get rates', 'failed');
                     }
                 });
             }
 
 
             function buffer_getSpecificData(){
-                $("#loading").slideDown( 400, "linear" );
-                counter = 6;
+                $("#loading").slideDown( 200, "linear" );
+                counter = 8;
                 allrates_history = [];
                 var interval = $("#chartinterval").val();
                 getSpecificData(interval);
@@ -488,7 +495,7 @@
                         counter--;
                         getSpecificData(interval);
                     }else{
-                        $("#loading").slideUp( 800, "linear" );
+                        $("#loading").slideUp( 1000 );
                         $('body').animate({ scrollTop: 0 });
                     }
                     return false;
@@ -522,12 +529,12 @@
                                 counter--;
                                 getSpecificData(interval);
                             }else{
-                                $("#loading").slideUp( 800, "linear" );
+                                $("#loading").slideUp( 1000 );
                                 $('body').animate({ scrollTop: 0 });
                             }
                         },
                         error : function(httpReq,status,exception){
-                            alert(status+" "+exception);
+                            alert("Please ensure your device had connected to internet.");
                         }
                     });
                 }
@@ -581,23 +588,37 @@
                 chart.draw(newchart, options);
             }
 
+            function initAds() {
+                if (admob) {
+                    admob.setOptions({
+                        publisherId: "ca-app-pub-9969581706012169/9871812331",
+                        isTesting:true
+                    });
+                } 
+                ga_storage._trackEvent('Advertistment', 'init Ad', 'init Ad');
+            }
 
-            //------ADS
+            function initGA(){
+                ga_storage._setAccount('UA-71645264-5');
+                ga_storage._setDomain('none');
+
+                ga_storage._disableSSL();
+
+                ga_storage._trackPageview('/index', 'Mainpage');
+                ga_storage._trackEvent('currentcurrency', 'Open APP', 'Open APP');
+            }
             
             function onDeviceReady() {
-
-                /*
-                admob.createBannerView({
-                  publisherId:"ca-app-pub-9969581706012169/5605224331"
-                });
-*/
                 
                 document.addEventListener("resume", onResume, false);
                 document.addEventListener("backbutton", onBackKeyDown, false);
 
+                initGA();
+
+                initAds();
+                admob.createBannerView();
+
                 init_func();
-                //initAds();
-                //admob.createBannerView();
             }
 
             function onBackKeyDown() {
@@ -698,10 +719,11 @@
                 <h4>Current Currency</h4>
                 <ul>
                   <li>All right reserved &copy; Seohea Production</li>
-                  <li>Version 0.4</li>
+                  <li>Version 0.5</li>
                 </ul>
                 <br><hr>
                 <p style="font-size:12px;">Currecny rate provided by fixer.io. </p>
+                <p style="font-size:10px;">Rates updated daily.</p>
                 <p style="font-size:10px;">We shall have no liability for the accuracy of the information and cannot be held liable for any third-party claims or losses.</p>
               </div>
             </div>
@@ -719,7 +741,7 @@
                 <select id="country_select"></select>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick="add_country($('#country_select').val());"><span class="icon icon-plus"></span></button>
+                <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" onclick="add_country($('#country_select').val());"><span class="icon icon-plus">Add</span></button>
               </div>
             </div>
           </div>
@@ -736,7 +758,7 @@
                 <select id="set_country"></select>
                 </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" onclick="setcountry($('#set_country').val());"><span class="icon icon-check"></span></button>
+                <button type="button" class="btn btn-default btn-xs" data-dismiss="modal" onclick="setcountry($('#set_country').val());"><span class="icon icon-check">Set</span></button>
               </div>
             </div>
           </div>
@@ -756,8 +778,8 @@
                   
                 </div-->
                 <select id="chartinterval">
-                    <option value="1" selected>1 Day</option>
-                    <option value="7">7 Days</option>
+                    <option value="1">1 Day</option>
+                    <option value="7" selected>7 Days</option>
                     <option value="30">30 Days</option>
                     <option value="180">Half Year</option>
                     <option value="365">1 Year</option>
@@ -765,7 +787,7 @@
                   </select>
               </div>
               <div class="modal-footer">
-                <button class="btn btn-default btn-xs" data-dismiss="modal" onclick="buffer_getSpecificData();"><span class="icon icon-check"></span></button>
+                <button class="btn btn-default btn-xs" data-dismiss="modal" onclick="buffer_getSpecificData();"><span class="icon icon-check">Set</span></button>
               </div>
             </div>
           </div>
@@ -791,6 +813,9 @@
             <div class="modal-content">
               <div class="modal-body" style="padding:0px;">
                 <div class="btn-group-vertical" role="group" aria-label="..." style="width:100%;!important">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal" onclick="init_func();"><span class="icon icon-refresh"></span>&nbsp;Refresh data</button>
+                    </div>
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-default btn-lg" data-dismiss="modal" onclick="clear_history();"><span class="icon icon-trash"></span>&nbsp;Reset all countries and data</button>
                     </div>
