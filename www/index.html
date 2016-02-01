@@ -250,8 +250,8 @@
 
 
             $(document).ready(function() {
-                initGA();
-                init_func();
+                //initGA();
+                //init_func();
             });
 
             function init_func(){
@@ -634,7 +634,7 @@
             }
 
             function onResume() {
-
+                initGA();
             }
 
             document.addEventListener("deviceready", onDeviceReady, false);
@@ -719,7 +719,7 @@
                 <h4>Current Currency</h4>
                 <ul>
                   <li>All right reserved &copy; Seohea Production</li>
-                  <li>Version 0.5</li>
+                  <li>Version 0.6</li>
                 </ul>
                 <br><hr>
                 <p style="font-size:12px;">Currecny rate provided by fixer.io. </p>

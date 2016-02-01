@@ -1,4 +1,4 @@
-<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.seojai.currentcurrency" version="0.5">
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.seojai.currentcurrency" version="0.6">
   <name>Current Currency</name>
   <description>Current Currency</description>
   <author href="" email="seohea.production@gmail.com">Seohea Production</author>
@@ -19,10 +19,10 @@
   <preference name="android-minSdkVersion" value="14"/>
   <preference name="android-installLocation" value="auto"/>
   <preference name="EnableViewportScale" value="true" />
+  <preference name="SplashScreen" value="screen"/>
   <gap:plugin name="org.apache.cordova.device"/>
   <gap:plugin name="org.apache.cordova.device-motion"/>
   <gap:plugin name="org.apache.cordova.device-orientation"/>
-  <gap:plugin name="org.apache.cordova.inappbrowser"/>
   <gap:plugin name="org.apache.cordova.network-information"/>
   <gap:plugin name="cordova-admob" source="npm"/>
   <icon src="icon.png"/>
