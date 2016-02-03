@@ -120,7 +120,7 @@
 
             #tutorial_block{
                 /*background: -webkit-linear-gradient(top, rgba(0,0,0,0), rgba(0,0,0,0.5));*/
-                background-color: rgba(0,0,0,0.1);
+                background-color: rgba(0,0,0,0.3);
                 color:white;
                 z-index: 99990; 
                 position:fixed; 
@@ -144,7 +144,7 @@
             }
 
             #loading{
-                background-color: rgba(0,0,0,0.8);
+                background-color: rgba(0,0,0,0.7);
                 color:white;
                 z-index: 999; 
                 position:fixed; 
@@ -361,7 +361,7 @@
             }
 
             function close_tutorial(){
-                $('div, a, input, span').tooltip('hide');
+                $('div, a, input, span, .myPanel').tooltip('hide');
                 $("#tutorial_block").hide();
             }
 
@@ -775,7 +775,7 @@
         </header>
 
         <div id="loading"><br><span class="icon icon-refresh moveanimation" style="font-size:22px;"></span><br><p>Our Monkey is trying to gather Currency Rate...</p></div>
-        <div id="tutorial_block"><button id="tutorial_block_close" class="btn btn-success" onclick="close_tutorial();">Got it!</button></div>
+        <div id="tutorial_block"><button id="tutorial_block_close" class="btn btn-default" onclick="close_tutorial();">Got it!</button></div>
 
         <div class="container">
 
@@ -829,7 +829,7 @@
                 <h4>Current Currency</h4>
                 <ul>
                   <li>All right reserved &copy; Seohea Production</li>
-                  <li>Version 0.80</li>
+                  <li>Version 0.81</li>
                 </ul>
                 <br><hr>
                 <p style="font-size:12px;">Currecny rate provided by fixer.io. </p>
