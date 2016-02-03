@@ -1,4 +1,4 @@
-<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.seojai.currentcurrency" version="0.81">
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.seojai.currentcurrency" version="0.83">
   <name>Current Currency</name>
   <description>Current Currency</description>
   <author href="" email="seohea.production@gmail.com">Seohea Production</author>
@@ -19,12 +19,7 @@
   <preference name="android-installLocation" value="auto"/>
   <preference name="EnableViewportScale" value="true" />
   <preference name="SplashScreen" value="screen"/>
-  <preference name="AutoHideSplashScreen" value="true" />
   <preference name="SplashScreenDelay" value="5000" />
-  <preference name="SplashScreenBackgroundColor" value="black" />
-  <preference name="SplashMaintainAspectRatio" value="false" />
-  <preference name="SplashShowOnlyFirstTime" value="false" />
-  <preference name="ShowSplashScreen" value="true" />
   <gap:plugin name="org.apache.cordova.device"/>
   <gap:plugin name="org.apache.cordova.device-motion"/>
   <gap:plugin name="org.apache.cordova.device-orientation"/>
@@ -46,14 +41,14 @@
   <icon src="www/res/icon/windows-phone/icon-48.png" gap:platform="winphone"/>
   <icon src="www/res/icon/windows-phone/icon-173-tile.png" gap:platform="winphone" gap:role="background"/>
   <platform name="android">
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="land-hdpi"/>
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="land-ldpi"/>
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="land-mdpi"/>
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="land-xhdpi"/>
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="port-hdpi"/>
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="port-ldpi"/>
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="port-mdpi"/>
-      <splash src="www/res/screen/android/screen-xhdpi-portrait.png" density="port-xhdpi"/>
+      <splash src="screen.png" density="land-hdpi"/>
+      <splash src="screen.png" density="land-ldpi"/>
+      <splash src="screen.png" density="land-mdpi"/>
+      <splash src="screen.png" density="land-xhdpi"/>
+      <splash src="screen.png" density="port-hdpi"/>
+      <splash src="screen.png" density="port-ldpi"/>
+      <splash src="screen.png" density="port-mdpi"/>
+      <splash src="screen.png" density="port-xhdpi"/>
   </platform>
   <access origin="*"/>
   <plugin name="cordova-plugin-whitelist" version="1"/>
