@@ -1,4 +1,4 @@
-<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.seojai.currentcurrency" version="0.9">
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.seojai.currentcurrency" version="1.0">
   <name>Current Currency</name>
   <description>Current Currency</description>
   <author href="" email="seohea.production@gmail.com">Seohea Production</author>
